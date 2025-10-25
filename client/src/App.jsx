@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from 'react'
 import MessageBubble from './components/MessageBubble'
 import { sendMessage } from './services/api'
 import { speakSpanish } from './tts'
+import { startListening, stopListening, isSpeechRecognitionSupported } from './stt'
 import { translateText } from './services/api'
 import gatorGabberLogo from './assets/gatorGabber.png'
 import './App.css'
 // COMBINING ALL OUR COMPONENTS AND SERVICES 
-// (MESSAGE BUBBLES, API CALLS, TTS) INTO THE MAIN APP
+// (MESSAGE BUBBLES, API CALLS, TTS, STT) INTO THE MAIN APP
 
 export default function App() {
   // state to hold messages
@@ -23,9 +24,18 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   // ADDED - Feature 2: State to hold the current class context
   const [currentClass, setCurrentClass] = useState('default');
+  // ADDED - Feature 3: State to track if speech recognition is active
+  const [isListening, setIsListening] = useState(false);
+  // ADDED - Feature 3: State to check if STT is supported
+  const [sttSupported, setSttSupported] = useState(true);
 
   const inputRef = useRef(null);
   const chatWindowRef = useRef(null);
+
+  // Check if STT is supported on component mount
+  useEffect(() => {
+    setSttSupported(isSpeechRecognitionSupported());
+  }, []);
 
   // Auto-speak new AI messages
   useEffect(() => {
@@ -66,6 +76,35 @@ export default function App() {
         prevMessages.map(m => 
           m.id === messageId ? { ...m, translation: "[Translation failed]" } : m
         )
+      );
+    }
+  };
+
+  // ADDED - Feature 3: Handler for microphone button
+  const handleMicrophoneClick = () => {
+    if (isListening) {
+      // Stop listening
+      stopListening();
+      setIsListening(false);
+    } else {
+      // Start listening
+      setIsListening(true);
+      startListening(
+        // onResult callback
+        (transcript) => {
+          setInput(transcript);
+          setIsListening(false);
+        },
+        // onError callback
+        (error) => {
+          console.error('Speech recognition error:', error);
+          setIsListening(false);
+          alert('Error al reconocer el habla. Por favor, intenta de nuevo.');
+        },
+        // onEnd callback
+        () => {
+          setIsListening(false);
+        }
       );
     }
   };
@@ -205,7 +244,22 @@ export default function App() {
               placeholder="Escribe en español..."
               disabled={isLoading}
             />
-            {/* The button is on the far right */}
+            {/* Microphone button */}
+            {sttSupported && (
+              <button 
+                type="button" 
+                className={`btn btn-mic-circle ms-2 ${isListening ? 'listening' : ''}`}
+                onClick={handleMicrophoneClick}
+                disabled={isLoading}
+                title="Hablar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-mic-fill" viewBox="0 0 16 16">
+                  <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/>
+                  <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                </svg>
+              </button>
+            )}
+            {/* The send button is on the far right */}
             <button type="submit" className="btn btn-send-circle ms-2" disabled={isLoading}>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-send-fill" viewBox="0 0 16 16">
                 <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.001.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
