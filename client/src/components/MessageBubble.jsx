@@ -1,5 +1,5 @@
 // creates div to display onto screen
-export default function messageBubble({message, role}) {
+export default function MessageBubble({message, role}) {
     const isUser = role === 'user';
     return (
         <div style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start', margin: '8px 0' }}>
