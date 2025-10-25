@@ -3,7 +3,9 @@ import React from 'react';
 //import './MessageBubble.css'; // Make sure this file exists, or comment it out for now
 
 // ADDED - Fix: Import from 'react-icons/fa' which is the Font Awesome icon set
-import { FaUser, FaRobot, FaVolumeUp, FaPlay, FaGlobe } from 'react-icons/fa'; 
+import { FaUser, FaRobot, FaGlobe } from 'react-icons/fa'; 
+import {FaRepeat} from 'react-icons/fa6';
+import { LuTurtle } from "react-icons/lu";
 
 // creates div to display onto screen
 // ADDED - Feature 1: Component now accepts 'id' and new event handlers
@@ -25,11 +27,11 @@ const MessageBubble = ({ id, role, text, onRepeat, onSlow, onTranslate }) => {
           <div className="action-buttons">
             {/* ADDED - Feature 1: "Repeat" button */}
             <button onClick={() => onRepeat(text)} title="Repeat">
-              <FaVolumeUp />
+              <FaRepeat />
             </button>
             {/* ADDED - Feature 1: "Slow" button */}
             <button onClick={() => onSlow(text)} title="Slow">
-              <FaPlay />
+              <LuTurtle />
             </button>
             {/* ADDED - Feature 1: "Translate" button (passes message ID) */}
             <button onClick={() => onTranslate(text, id)} title="Translate">

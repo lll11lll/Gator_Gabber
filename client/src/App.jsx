@@ -172,8 +172,8 @@ export default function App() {
           <div className="container-fluid">
             <a className="navbar-brand d-flex align-items-center" href="#">
               {/* Updated logo per your screenshot */}
-              <img src={gatorGabberLogo} alt="Voces Logo" width="40" height="40" className="d-inline-block align-text-top me-2" />
-              Voces
+              <img src={gatorGabberLogo} alt="GatorGabber Logo" width="40" height="40" className="d-inline-block align-text-top me-2" />
+              GatorGabber
             </a>
             
             {/* Context Selector Buttons */}
@@ -191,14 +191,28 @@ export default function App() {
                 className={`btn btn-sm ${currentClass === 'spanish_1130' ? 'btn-light' : 'btn-outline-light'}`}
                 onClick={() => setCurrentClass('spanish_1130')}
               >
-                Spanish 1130
+                SPN1130
+              </button>
+                            <button 
+                type="button"
+                className={`btn btn-sm ${currentClass === 'spanish_1131' ? 'btn-light' : 'btn-outline-light'}`}
+                onClick={() => setCurrentClass('spanish_1131')}
+              >
+                SPN1131
               </button>
               <button 
                 type="button"
                 className={`btn btn-sm ${currentClass === 'spanish_2200' ? 'btn-light' : 'btn-outline-light'}`}
                 onClick={() => setCurrentClass('spanish_2200')}
               >
-                Intermediate
+                SPN2200
+              </button>
+                            <button 
+                type="button"
+                className={`btn btn-sm ${currentClass === 'spanish_2201' ? 'btn-light' : 'btn-outline-light'}`}
+                onClick={() => setCurrentClass('spanish_2201')}
+              >
+                SPN2201
               </button>
             </div>
           </div>
