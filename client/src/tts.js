@@ -73,7 +73,7 @@ export async function speakSpanish(text,{rate=1, pitch=1} = {} ){
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel(); // stop anything
 
-    const utter = new window.SpeechSynthesisUtterance(text);
+    const utter = new SpeechSynthesisUtterance(text);
     utter.rate = rate;
     utter.pitch = pitch;
 

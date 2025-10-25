@@ -1,42 +1,249 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* Global and App Container */
+:root {
+  --gator-blue: #0021A5; 
+  --gator-orange: #FA4616;
+  --gator-light-gray: #f4f6f8;
+  --header-bg: linear-gradient(135deg, var(--gator-blue) 0%, #0032c7 100%);
+  --user-bg: linear-gradient(135deg, var(--gator-orange) 0%, #d93d13 100%);
+  --assistant-bg: #f1f3f5;
+  --body-bg: #e9ecef; /* A slightly darker gray for the page background */
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--body-bg); /* Use new body bg */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Page wrapper to center the app card */
+.page-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* App container is now a "card" with a set height */
+.app-container {
+  width: 100%;
+  max-width: 700px; /* Constrain width */
+  height: 90vh; /* This creates the "set length" */
+  max-height: 800px; /* Max pixel height */
+  background-color: #ffffff;
+  border-radius: 1rem; /* Softer rounded corners */
+  overflow: hidden; /* Enforces rounded corners on children */
+  /* This d-flex and flex-column is what makes the footer stick to the bottom! */
+  display: flex;
+  flex-direction: column;
 }
 
-.card {
-  padding: 2em;
+/* App Header */
+.app-header {
+  background: var(--header-bg);
+  flex-shrink: 0; /* Prevents header from shrinking */
 }
 
-.read-the-docs {
-  color: #888;
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1.5rem;
 }
+
+.navbar-brand img {
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.8);
+}
+
+.context-selector .btn {
+  font-weight: 500;
+  border-radius: 50px; /* Pill buttons */
+  padding: 0.25rem 0.75rem;
+}
+.context-selector .btn-light {
+  color: var(--gator-blue);
+  font-weight: 600;
+}
+
+/* Chat Window with custom scrollbar */
+.chat-window {
+  background-color: #ffffff;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  /* This flex-grow is VITAL for the layout, it pushes the footer down */
+  flex-grow: 1;
+}
+
+/* Webkit scrollbar styling */
+.chat-window::-webkit-scrollbar {
+  width: 8px;
+}
+.chat-window::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.chat-window::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+.chat-window::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+
+/* Message Bubble Styles */
+.bubble-container {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 10px;
+  max-width: 85%;
+}
+
+.bubble-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.bubble {
+  padding: 12px 18px;
+  border-radius: 20px;
+  line-height: 1.5;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* User Bubble (Right) */
+.align-right {
+  margin-left: auto;
+  flex-direction: row-reverse;
+}
+
+.align-right .bubble-icon {
+  background: var(--user-bg);
+  margin-left: 10px;
+}
+
+.align-right .bubble {
+  background: var(--user-bg);
+  color: white;
+  border-bottom-right-radius: 5px;
+}
+
+/* Assistant Bubble (Left) */
+.align-left {
+  margin-right: auto;
+}
+
+.align-left .bubble-icon {
+  background-color: #6c757d;
+  margin-right: 10px;
+}
+
+.align-left .bubble {
+  background-color: var(--assistant-bg);
+  color: #333;
+  border-bottom-left-radius: 5px;
+}
+
+/* Action Buttons (under AI bubble) */
+.action-buttons {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+  gap: 8px;
+}
+
+.action-buttons button {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 50px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-buttons button:hover {
+  background: #f8f9fa;
+  border-color: #aaa;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Translation Bubble */
+.translation-bubble {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #6c757d;
+  padding: 8px 18px;
+  background-color: #f8f9fa;
+  border: 1px solid #eee;
+  border-radius: 20px;
+  margin-top: -5px;
+  margin-left: 50px; /* Aligns with assistant bubble */
+  margin-bottom: 10px;
+  max-width: 85%;
+  border-top-left-radius: 5px;
+}
+
+
+@keyframes typing {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; transform: translateY(-3px); }
+  100% { opacity: 0.4; }
+}
+
+/* REFINED: Message Form Footer */
+.message-form-container {
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.03);
+  /* This is key to pinning it to the bottom */
+  flex-shrink: 0; 
+  background: #fff; /* Ensures it's not transparent */
+}
+
+/* Styles for the screenshot-style input */
+.message-form {
+  display: flex;
+  align-items: center;
+}
+
+.message-form .form-control {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  /* This makes the input take all available space */
+  flex-grow: 1; 
+  font-size: 1rem;
+  padding: 0.5rem 0.25rem; 
+}
+/* Removes the blue glow on focus */
+.message-form .form-control:focus {
+  box-shadow: none;
+}
+
+/* This is the style for the circular send button */
+.btn-send-circle {
+  border-radius: 50% !important; /* Make the button a circle */
+  width: 42px;
+  height: 42px;
+  /* Prevents button from shrinking */
+  flex-shrink: 0; 
+  background: var(--user-bg);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-send-circle:hover {
+  background: #d93d13;
+  color: white;
+}
+

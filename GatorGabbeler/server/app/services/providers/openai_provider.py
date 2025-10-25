@@ -4,7 +4,7 @@ import httpx
 # Hola, ¿puedes presentarte?"
 
 async def call_openai(system_prompt:str, user_message:str) -> str:
-    api_key = os.getenv("openai_api_key")
+    api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("OpenAI_API_KEY not set")
     model = os.getenv("openai_model", "gpt-5-mini")
