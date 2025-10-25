@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
+import { FaCog } from 'react-icons/fa'
 import MessageBubble from './components/MessageBubble'
+import SettingsPanel from './components/SettingsPanel'
 import { sendMessage } from './services/api'
 import { speakSpanish } from './tts'
 import { startListening, stopListening, isSpeechRecognitionSupported } from './stt'
@@ -28,6 +30,14 @@ export default function App() {
   const [isListening, setIsListening] = useState(false);
   // ADDED - Feature 3: State to check if STT is supported
   const [sttSupported, setSttSupported] = useState(true);
+  // ADDED - Feature 4: Settings panel state
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  // ADDED - Feature 4: Voice settings state
+  const [voiceSettings, setVoiceSettings] = useState({
+    rate: 1.0,
+    pitch: 1.0,
+    voice: null
+  });
 
   const inputRef = useRef(null);
   const chatWindowRef = useRef(null);
@@ -41,18 +51,18 @@ export default function App() {
   useEffect(() => {
     const lastMsg = messages[messages.length - 1];
     if (lastMsg && lastMsg.role === 'assistant' && lastMsg.text !== '...') {
-      speakSpanish(lastMsg.text);
+      speakSpanish(lastMsg.text, voiceSettings);
     }
-  }, [messages]);
+  }, [messages, voiceSettings]);
 
   // ADDED - Feature 1: Handler for the "Repeat" button (normal speed)
   const handleRepeat = (text) => {
-    speakSpanish(text, { rate: 1 });
+    speakSpanish(text, { ...voiceSettings, rate: 1 });
   };
 
   // ADDED - Feature 1: Handler for the "Slow" button (slower speed)
   const handleSlow = (text) => {
-    speakSpanish(text, { rate: 0.7 });
+    speakSpanish(text, { ...voiceSettings, rate: 0.7 });
   };
 
   // ADDED - Feature 1: Handler for the "Translate" button
@@ -164,21 +174,40 @@ export default function App() {
   return (
     <div className="page-wrapper">
       
+      {/* Settings Panel */}
+      <SettingsPanel 
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        settings={voiceSettings}
+        onSettingsChange={setVoiceSettings}
+      />
+      
       {/* This is the main app "card" */}
       <div className="app-container shadow-lg d-flex flex-column">
         
         {/* Header Navbar */}
         <header className="app-header navbar navbar-expand navbar-dark">
-          <div className="container-fluid">
-            <a className="navbar-brand d-flex align-items-center" href="#">
-              {/* Updated logo per your screenshot */}
-              <img src={gatorGabberLogo} alt="GatorGabber Logo" width="40" height="40" className="d-inline-block align-text-top me-2" />
-              GatorGabber
-            </a>
+          <div className="header-wrapper">
+            {/* Top row: Logo left, Settings right */}
+            <div className="header-top-row">
+              <a className="navbar-brand" href="#">
+                <img src={gatorGabberLogo} alt="GatorGabber Logo" width="40" height="40" />
+                GatorGabber
+              </a>
+              
+              <button 
+                className="settings-icon-btn"
+                onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                title="Settings"
+                aria-label="Open settings"
+              >
+                <FaCog size={20} />
+              </button>
+            </div>
             
-            {/* Context Selector Buttons */}
-            <div className="context-selector btn-group" role="group" aria-label="Class Context">
-              <span className="navbar-text me-2 d-none d-sm-inline">Clase:</span>
+            {/* Bottom row: Context Selector */}
+            <div className="context-selector" role="group" aria-label="Class Context">
+              <span className="navbar-text d-none d-sm-inline">Clase:</span>
               <button 
                 type="button"
                 className={`btn btn-sm ${currentClass === 'default' ? 'btn-light' : 'btn-outline-light'}`}

@@ -69,7 +69,7 @@ function selectSpanish(voices) {
      return voices[0] || null;
 }
 
-export async function speakSpanish(text,{rate=1, pitch=1} = {} ){
+export async function speakSpanish(text,{rate=1, pitch=1, voice=null} = {} ){
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel(); // stop anything
 
@@ -77,8 +77,9 @@ export async function speakSpanish(text,{rate=1, pitch=1} = {} ){
     utter.rate = rate;
     utter.pitch = pitch;
 
-    const voice = await getSpanishVoices();
-    if(voice) utter.voice = voice;
-    utter.lang = voice?.lang || 'es-ES';
+    // Use provided voice or fallback to Spanish voice
+    const selectedVoice = voice || await getSpanishVoices();
+    if(selectedVoice) utter.voice = selectedVoice;
+    utter.lang = selectedVoice?.lang || 'es-ES';
     window.speechSynthesis.speak(utter);
 }
