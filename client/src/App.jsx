@@ -6,6 +6,7 @@ import { sendMessage } from './services/api'
 import { speakSpanish } from './tts'
 import { startListening, stopListening, isSpeechRecognitionSupported } from './stt'
 import { translateText } from './services/api'
+import { syllabifySpanishAdvanced } from './utils/syllabify'
 import gatorGabberLogo from './assets/gatorGabber.png'
 import './App.css'
 // COMBINING ALL OUR COMPONENTS AND SERVICES 
@@ -14,11 +15,12 @@ import './App.css'
 export default function App() {
   // state to hold messages
   const [messages, setMessages] = useState([
-    {// ADDED - Feature 1: Message state now includes 'id' and 'translation' field
+    {// ADDED - Feature 1: Message state now includes 'id', 'translation', and 'syllables' field
       id: 1, 
       role: 'assistant', 
       text: '¡Hola! ¿Cómo estás hoy?', 
-      translation: null}
+      translation: null,
+      syllables: null}
   ]);
   // state to hold user input
   const [input, setInput] = useState('');
@@ -41,28 +43,39 @@ export default function App() {
 
   const inputRef = useRef(null);
   const chatWindowRef = useRef(null);
+  const lastSpokenIdRef = useRef(null);
 
   // Check if STT is supported on component mount
   useEffect(() => {
     setSttSupported(isSpeechRecognitionSupported());
   }, []);
 
-  // Auto-speak new AI messages
+  // Auto-speak new AI messages (only when truly new, not when translation/syllables added)
   useEffect(() => {
     const lastMsg = messages[messages.length - 1];
-    if (lastMsg && lastMsg.role === 'assistant' && lastMsg.text !== '...') {
-      speakSpanish(lastMsg.text, voiceSettings);
+    if (lastMsg && 
+        lastMsg.role === 'assistant' && 
+        lastMsg.text !== '...' && 
+        lastMsg.id !== lastSpokenIdRef.current) {
+      lastSpokenIdRef.current = lastMsg.id;
+      speakSpanish(lastMsg.text, voiceSettings).catch(err => {
+        console.error('TTS error:', err);
+      });
     }
-  }, [messages, voiceSettings]);
+  }, [messages]);
 
   // ADDED - Feature 1: Handler for the "Repeat" button (normal speed)
   const handleRepeat = (text) => {
-    speakSpanish(text, { ...voiceSettings, rate: 1 });
+    speakSpanish(text, { ...voiceSettings, rate: 1 }).catch(err => {
+      console.error('TTS error:', err);
+    });
   };
 
   // ADDED - Feature 1: Handler for the "Slow" button (slower speed)
   const handleSlow = (text) => {
-    speakSpanish(text, { ...voiceSettings, rate: 0.7 });
+    speakSpanish(text, { ...voiceSettings, rate: 0.7 }).catch(err => {
+      console.error('TTS error:', err);
+    });
   };
 
   // ADDED - Feature 1: Handler for the "Translate" button
@@ -85,6 +98,32 @@ export default function App() {
       setMessages(prevMessages => 
         prevMessages.map(m => 
           m.id === messageId ? { ...m, translation: "[Translation failed]" } : m
+        )
+      );
+    }
+  };
+
+  // ADDED - Feature: Handler for the "Syllable" button
+  const handleSyllable = (textToSyllabify, messageId) => {
+    try {
+      // Check if already syllabified
+      const message = messages.find(m => m.id === messageId);
+      if (message && message.syllables) return; // Don't re-syllabify
+
+      // Use the advanced syllabification function
+      const syllabified = syllabifySpanishAdvanced(textToSyllabify);
+
+      // Find the message by ID and update its syllables field
+      setMessages(prevMessages => 
+        prevMessages.map(m => 
+          m.id === messageId ? { ...m, syllables: syllabified } : m
+        )
+      );
+    } catch (err) {
+      console.error("Syllabification failed:", err);
+      setMessages(prevMessages => 
+        prevMessages.map(m => 
+          m.id === messageId ? { ...m, syllables: "[Syllabification failed]" } : m
         )
       );
     }
@@ -124,20 +163,22 @@ export default function App() {
     const trimmed = input.trim();
     if (!trimmed || isLoading) return;
   
-  // ADDED - Feature 1: Ensure new user message has 'id' and 'translation'
+  // ADDED - Feature 1: Ensure new user message has 'id', 'translation', and 'syllables'
     const userMsg = { 
       id: Date.now(), 
       role: 'user', 
       text: trimmed, 
-      translation: null 
+      translation: null,
+      syllables: null
     };
     const aiMsgID = Date.now() + 1; // Unique ID for the AI message
-    // ADDED - Feature 1: Ensure placeholder AI message has 'id' and 'translation'
+    // ADDED - Feature 1: Ensure placeholder AI message has 'id', 'translation', and 'syllables'
     const aiMsgPlaceholder = { 
       id: aiMsgID, 
       role: 'assistant', 
       text: '...', 
-      translation: null 
+      translation: null,
+      syllables: null
     };
     
     setMessages([...messages, userMsg, aiMsgPlaceholder]);
@@ -148,12 +189,13 @@ export default function App() {
     // ADDED - Feature 2: Pass the current class context to the API
       const reply = await sendMessage(trimmed, currentClass);
 
-      // ADDED - Feature 1: Ensure final AI message has 'id' and 'translation'
+      // ADDED - Feature 1: Ensure final AI message has 'id', 'translation', and 'syllables'
       const aiMsg = { 
         id: aiMsgID, // Use same ID as placeholder
         role: 'assistant', 
         text: reply || 'No pude procesar eso.', 
-        translation: null 
+        translation: null,
+        syllables: null
       };
       setMessages(prev => prev.map(m => m.id === aiMsg.id ? aiMsg : m));
   }catch (err){
@@ -162,7 +204,8 @@ export default function App() {
         id: aiMsgID, // Use same ID as placeholder
         role: 'assistant',
         text: 'Lo siento, tuve un error. Intenta de nuevo.',
-        translation: null
+        translation: null,
+        syllables: null
       };
       setMessages(prev => prev.map(m => m.id === errorMsg.id ? errorMsg : m));
   }finally{
@@ -258,10 +301,16 @@ export default function App() {
                 onRepeat={handleRepeat}
                 onSlow={handleSlow}
                 onTranslate={handleTranslate}
+                onSyllable={handleSyllable}
               />
               {m.translation && (
                 <div className="translation-bubble">
                   {m.translation}
+                </div>
+              )}
+              {m.syllables && (
+                <div className="syllable-bubble">
+                  {m.syllables}
                 </div>
               )}
             </div>

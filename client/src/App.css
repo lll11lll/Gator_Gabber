@@ -352,6 +352,25 @@ body {
   animation: fadeIn 0.3s ease-out;
 }
 
+/* Syllable Bubble */
+.syllable-bubble {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--gator-blue);
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #e6f2ff 0%, #cce5ff 100%);
+  border: 1.5px solid #99ccff;
+  border-radius: var(--border-radius-lg);
+  margin-top: -8px;
+  margin-left: 54px;
+  margin-bottom: 1.25rem;
+  max-width: 85%;
+  border-top-left-radius: 6px;
+  box-shadow: var(--shadow-sm);
+  animation: fadeIn 0.3s ease-out;
+  letter-spacing: 0.5px;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -362,51 +381,6 @@ body {
 }
 
 
-/* Typing Indicator */
-.typing-indicator {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 16px 20px;
-  background-color: var(--assistant-bg);
-  border-radius: var(--border-radius-lg);
-  border-bottom-left-radius: 6px;
-  width: fit-content;
-  margin-left: 54px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid #e2e8f0;
-}
-
-.typing-indicator span {
-  width: 8px;
-  height: 8px;
-  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-  border-radius: 50%;
-  animation: typing 1.4s infinite ease-in-out;
-}
-
-.typing-indicator span:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.typing-indicator span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-indicator span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes typing {
-  0%, 60%, 100% { 
-    opacity: 0.3; 
-    transform: translateY(0);
-  }
-  30% { 
-    opacity: 1; 
-    transform: translateY(-8px); 
-  }
-}
 
 /* REFINED: Message Form Footer */
 .message-form-container {

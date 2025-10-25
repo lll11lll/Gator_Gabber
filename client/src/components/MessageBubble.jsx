@@ -4,12 +4,13 @@ import React from 'react';
 
 // ADDED - Fix: Import from 'react-icons/fa' which is the Font Awesome icon set
 import { FaUser, FaRobot, FaGlobe } from 'react-icons/fa'; 
-import {FaRepeat} from 'react-icons/fa6';
+import { FaRepeat } from 'react-icons/fa6';
 import { LuTurtle } from "react-icons/lu";
+import { TbTextScan2 } from "react-icons/tb"; // For syllable button
 
 // creates div to display onto screen
 // ADDED - Feature 1: Component now accepts 'id' and new event handlers
-const MessageBubble = ({ id, role, text, onRepeat, onSlow, onTranslate }) => {
+const MessageBubble = ({ id, role, text, onRepeat, onSlow, onTranslate, onSyllable }) => {
   const isUser = role === 'user';
   const bubbleClass = isUser ? 'bubble-user' : 'bubble-assistant';
   
@@ -36,6 +37,10 @@ const MessageBubble = ({ id, role, text, onRepeat, onSlow, onTranslate }) => {
             {/* ADDED - Feature 1: "Translate" button (passes message ID) */}
             <button onClick={() => onTranslate(text, id)} title="Translate">
               <FaGlobe />
+            </button>
+            {/* ADDED - Feature: "Syllable" button */}
+            <button onClick={() => onSyllable(text, id)} title="Show Syllables">
+              <TbTextScan2 />
             </button>
           </div>
         )}
