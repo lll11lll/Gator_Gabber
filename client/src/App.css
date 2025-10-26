@@ -251,6 +251,7 @@ body {
   font-size: 1.1rem;
 }
 
+
 .bubble {
   padding: 14px 20px;
   border-radius: var(--border-radius-lg);
@@ -477,6 +478,36 @@ body {
   transition: var(--transition-smooth);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
+}
+
+/* Add this to your App.css file */
+
+.btn-plus-circle {
+    /* Use a standard grey color for the circle */
+    background-color: #adb5bd; /* Bootstrap's gray-500 or similar */
+    color: white; 
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    flex-shrink: 0; /* Prevents the button from shrinking */
+    border: none;
+    box-shadow: none;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.btn-plus-circle:hover,
+.btn-plus-circle:focus {
+    background-color: #6c757d; /* Darker grey on hover */
+    color: white;
+}
+
+.btn-plus-circle:disabled {
+    background-color: #e9ecef; /* Lighter grey when disabled */
+    opacity: 0.65;
 }
 
 .btn-mic-circle:hover:not(:disabled) {

@@ -30,3 +30,6 @@ README.md
 DEPLOY_CHECKLIST.md
 DEPLOYMENT.md
 QUICK_DEPLOY.md
+GatorGabbeler/server/app/rag/__pycache__/__init__.cpython-313.pyc
+GatorGabbeler/server/app/rag/__pycache__/retriever.cpython-313.pyc
+GatorGabbeler/server/app/rag/__pycache__/vector_store.cpython-313.pyc
