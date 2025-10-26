@@ -3,8 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
-from fastapi.responses import FileResponse # Ensure this is imported for index.html fallback
+from fastapi.responses import FileResponse
 import os
+import base64
+from typing import Optional, Dict
 
 # Import the 'generate_translation' function
 from .services.llm import generate_spanish_reply, generate_translation
@@ -35,10 +37,15 @@ app.add_middleware(
 
 # --- Pydantic Models ---
 
+class FileMetadata(BaseModel):
+    name: str
+    type: str
+
 class ChatRequest(BaseModel):
-    message: str
-    #  Add 'context' field to the chat request model
-    context: str | None = None
+    text: str
+    classContext: str | None = None
+    file: Optional[str] = None  # base64 encoded file content
+    fileMetadata: Optional[FileMetadata] = None
 
 class ChatResponse(BaseModel):
     response: str
@@ -56,13 +63,31 @@ class TranslateResponse(BaseModel):
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
-    msg = (req.message or "").strip()
-    if not msg:
-        raise HTTPException(status_code=400, detail="Missing 'message'")
+    text = (req.text or "").strip()
+    if not text and not req.file:
+        raise HTTPException(status_code=400, detail="Missing both message and file")
 
     try:
-        # Pass the received 'context' to the LLM service
-        reply = await generate_spanish_reply(msg, req.context) 
+        # Handle file content if present
+        file_context = None
+        if req.file and req.fileMetadata:
+            try:
+                # Decode base64 content
+                file_content = base64.b64decode(req.file).decode('utf-8')
+                
+                # Create context from file content
+                file_context = f"Content from file '{req.fileMetadata.name}':\n{file_content}"
+            except Exception as e:
+                print(f"File processing error: {e}")
+                file_context = "Error processing file content."
+
+        # Combine message context with file context if present
+        context = req.classContext or "default"
+        if file_context:
+            context = f"{context}\n\nFile Context:\n{file_context}"
+
+        # Pass both the message and context to the LLM service
+        reply = await generate_spanish_reply(text, context)
         return ChatResponse(response=reply)
     except Exception as e:
         print(f"LLM Error: {e}")
