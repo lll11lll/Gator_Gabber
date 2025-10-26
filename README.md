@@ -14,12 +14,12 @@ An AI-powered Spanish conversation partner designed specifically for University 
 - **Syllabification**: Break down Spanish words to improve pronunciation
 
   
-## Course-Aligned Cotent**
+## **Course-Aligned Cotent**
 - **RAG System**: Potential to retrieve relevant information from course materials (PDFs, syllabi)
 - **Class-Specific Contexts**: Switch between SPN1130, SPN1131, SPN2200, SPN2201
 - **Personalized Responses**: AI tutor "Alberto" adapts to your class leve
 
-## **Customizable Experiences **
+## **Customizable Experiences**
 - Adjust speech rate and pitch
 - Select from available spanish voices
 - Repeat messages at normal or slow speed
