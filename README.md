@@ -24,7 +24,7 @@ An AI-powered Spanish conversation partner designed specifically for University 
 - Select from available spanish voices
 - Repeat messages at normal or slow speed
 - interactive setting panel
-
+## **File Structure**
 - 
 ```
 Gator_Gabber/
