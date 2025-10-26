@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from fastapi.responses import FileResponse # Ensure this is imported for index.html fallback
+import os
 
 # Import the 'generate_translation' function
 from .services.llm import generate_spanish_reply, generate_translation
@@ -10,6 +12,26 @@ from .services.llm import generate_spanish_reply, generate_translation
 from .rag import get_spn1130_store
 
 app = FastAPI()
+
+# Configure CORS for production deployment
+# Add your Vercel/Netlify frontend URL to allowed origins
+origins = [
+    "http://localhost:5173",  # Local development
+    "http://localhost:5050",
+    "http://localhost:3000",
+    # Add your production frontend URLs here after deployment:
+    # "https://gator-gabber.vercel.app",
+    # "https://yourdomain.netlify.app",
+]
+
+# Allow CORS for deployed frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- Pydantic Models ---
 

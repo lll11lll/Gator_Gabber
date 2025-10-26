@@ -27,3 +27,6 @@ GatorGabbeler/server/build_rag_index.py
 GatorGabbeler/server/data/README.md
 GatorGabbeler/server/data/spanish_1130/README.md
 README.md
+DEPLOY_CHECKLIST.md
+DEPLOYMENT.md
+QUICK_DEPLOY.md
