@@ -6,6 +6,7 @@ An AI-powered Spanish conversation partner designed specifically for University 
 
 [![Live Demo](https://img.shields.io/badge/demo-live-success)](https://gatorgabber.vercel.app)
 
+ If it’s been idle ~ for 30 minutes, the first response might take up to ~50 seconds, cold start. After that, it's smooth sailing.
 
 ## **Features**
 - **Speech-to-Text (STT)**: Speak in Spanish and see your words transcribed
