@@ -10,6 +10,14 @@ GatorGabbeler/server/app/rag/__pycache__/__init__.cpython-311.pyc
 GatorGabbeler/server/app/rag/__pycache__/retriever.cpython-311.pyc
 GatorGabbeler/server/app/rag/__pycache__/vector_store.cpython-311.pyc
 
+# Environment variables and secrets
+.env
+GatorGabbeler/server/.env
+*.env
+# But allow .env.example
+!.env.example
+!**/.env.example
+
 # RAG development/documentation files
 GatorGabbeler/server/test_rag.py
 GatorGabbeler/server/RAG_IMPLEMENTATION.md
