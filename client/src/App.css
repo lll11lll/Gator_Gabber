@@ -487,8 +487,8 @@ body {
     background-color: #adb5bd; /* Bootstrap's gray-500 or similar */
     color: white; 
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     display: flex;
     justify-content: center;
     align-items: center;
