@@ -1,5 +1,13 @@
 # requirements in order to run the GatorGabbeler server
-fastapi==0.114.2
-uvicorn[standard]==0.30.6
-python-dotenv==1.0.1
-httpx==0.27.2
+fastapi
+uvicorn[standard]
+python-dotenv
+httpx
+
+# RAG dependencies - use with Python 3.11 or 3.12 for pre-built wheels DO NOT USE IF PY 3.14 TOO MUCH TIME 
+langchain
+langchain-openai
+langchain-community
+pypdf
+chromadb
+tiktoken

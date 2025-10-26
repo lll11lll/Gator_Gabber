@@ -6,3 +6,16 @@ GatorGabbeler/server/app/__pycache__/main.cpython-313.pyc
 GatorGabbeler/server/app/config/__pycache__/system_prompt.cpython-313.pyc
 GatorGabbeler/server/app/services/__pycache__/llm.cpython-313.pyc
 GatorGabbeler/server/app/services/providers/__pycache__/openai_provider.cpython-313.pyc
+GatorGabbeler/server/app/rag/__pycache__/__init__.cpython-311.pyc
+GatorGabbeler/server/app/rag/__pycache__/retriever.cpython-311.pyc
+GatorGabbeler/server/app/rag/__pycache__/vector_store.cpython-311.pyc
+
+# RAG development/documentation files
+GatorGabbeler/server/test_rag.py
+GatorGabbeler/server/RAG_IMPLEMENTATION.md
+GatorGabbeler/server/RAG_QUICKSTART.md
+GatorGabbeler/server/check_requirements.py
+GatorGabbeler/server/build_rag_index.py
+GatorGabbeler/server/data/README.md
+GatorGabbeler/server/data/spanish_1130/README.md
+README.md

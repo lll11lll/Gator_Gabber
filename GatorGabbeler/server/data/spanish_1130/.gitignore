@@ -1,0 +1,10 @@
+# Ignore PDF files (usually copyrighted course materials)
+*.pdf
+
+# Ignore ChromaDB vector store
+*/chroma_db/
+chroma_db/
+
+# Keep the directory structure
+!.gitignore
+!README.md

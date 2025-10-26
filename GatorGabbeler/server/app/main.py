@@ -4,8 +4,10 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from fastapi.responses import FileResponse # Ensure this is imported for index.html fallback
 
-# ADDED - Feature 1: Import the new 'generate_translation' function
+# Import the 'generate_translation' function
 from .services.llm import generate_spanish_reply, generate_translation
+# RAG: Import RAG utilities
+from .rag import get_spn1130_store
 
 app = FastAPI()
 
@@ -13,18 +15,18 @@ app = FastAPI()
 
 class ChatRequest(BaseModel):
     message: str
-    # ADDED - Feature 2: Add 'context' field to the chat request model
+    #  Add 'context' field to the chat request model
     context: str | None = None
 
 class ChatResponse(BaseModel):
     response: str
 
-# ADDED - Feature 1: Pydantic model for the new translation request
+# Pydantic model for the new translation request
 class TranslateRequest(BaseModel):
     text: str
     target_language: str = "English"
 
-# ADDED - Feature 1: Pydantic model for the new translation response
+#Pydantic model for the new translation response
 class TranslateResponse(BaseModel):
     translation: str
 
@@ -37,14 +39,14 @@ async def chat(req: ChatRequest):
         raise HTTPException(status_code=400, detail="Missing 'message'")
 
     try:
-        # ADDED - Feature 2: Pass the received 'context' to the LLM service
+        # Pass the received 'context' to the LLM service
         reply = await generate_spanish_reply(msg, req.context) 
         return ChatResponse(response=reply)
     except Exception as e:
         print(f"LLM Error: {e}")
         raise HTTPException(status_code=500, detail=f"LLM failure: {e}")
 
-# ADDED - Feature 1: New endpoint to handle translation requests
+# New endpoint to handle translation requests
 @app.post("/api/translate", response_model=TranslateResponse)
 async def translate(req: TranslateRequest):
     try:
@@ -53,6 +55,42 @@ async def translate(req: TranslateRequest):
     except Exception as e:
         print(f"Translation Error: {e}")
         raise HTTPException(status_code=500, detail=f"Translation failure: {e}")
+
+# RAG: Health check endpoint for RAG system
+@app.get("/api/rag/status")
+async def rag_status():
+    """Check if RAG system is ready and working."""
+    try:
+        store = get_spn1130_store()
+        
+        # Check if vector store exists
+        has_index = store.vector_store is not None
+        
+        # Count PDF files
+        pdf_count = len(list(store.data_dir.glob("*.pdf"))) if store.data_dir.exists() else 0
+        
+        # Try a test search
+        can_search = False
+        if has_index:
+            try:
+                results = store.similarity_search("test", k=1)
+                can_search = len(results) > 0
+            except:
+                pass
+        
+        return {
+            "status": "ready" if (has_index and can_search) else "not_ready",
+            "has_vector_store": has_index,
+            "pdf_count": pdf_count,
+            "can_search": can_search,
+            "data_directory": str(store.data_dir),
+            "index_path": str(store.index_path)
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e)
+        }
 
 # --- Static Files (Vite Frontend) ---
 
@@ -67,7 +105,7 @@ if static_files_dir.exists():
 else:
     print(f"Warning: Static files directory not found at {static_files_dir}")
 
-# Fallback for client-side routing (if you add it later)
+# Fallback for client-side routing 
 @app.get("/{full_path:path}")
 async def read_index(full_path: str):
     index_path = static_files_dir / "index.html"
