@@ -18,7 +18,8 @@ An AI-powered Spanish conversation partner designed specifically for University 
 ## **Course-Aligned Cotent**
 - **RAG System**: Potential to retrieve relevant information from course materials (PDFs, syllabi)
 - **Class-Specific Contexts**: Switch between SPN1130, SPN1131, SPN2200, SPN2201
-- **Personalized Responses**: AI tutor "Alberto" adapts to your class leve
+- **Personalized Responses**: AI tutor "Alberto" adapts to your class difficulty level
+- **Plans for Expansion**: Plans to expand capabilities to other languages offered at UF
 
 ## **Customizable Experiences**
 - Adjust speech rate and pitch
