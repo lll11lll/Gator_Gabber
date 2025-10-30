@@ -8,6 +8,7 @@ import { startListening, stopListening, isSpeechRecognitionSupported } from './s
 import { translateText } from './services/api'
 import { syllabifySpanishAdvanced } from './utils/syllabify'
 import gatorGabberLogo from './assets/gatorGabber.png'
+import LettersAnimation from "./assets/LettersAnimation"
 import './App.css'
 
 export default function App() {
@@ -279,128 +280,130 @@ export default function App() {
     }
     
     return (
-        <div className="page-wrapper">
-            
-            {/* Settings Panel */}
-            <SettingsPanel 
-                isOpen={isSettingsOpen}
-                onClose={() => setIsSettingsOpen(false)}
-                settings={voiceSettings}
-                onSettingsChange={setVoiceSettings}
-            />
-            
-            {/* This is the main app "card" */}
-            <div className="app-container shadow-lg d-flex flex-column">
+    <div className="background-animation">
+            <LettersAnimation/>
+            <div className="page-wrapper">
+                {/* Settings Panel */}
+                <SettingsPanel 
+                    isOpen={isSettingsOpen}
+                    onClose={() => setIsSettingsOpen(false)}
+                    settings={voiceSettings}
+                    onSettingsChange={setVoiceSettings}
+                />
                 
-                {/* Header Navbar */}
-                <header className="app-header navbar navbar-expand navbar-dark">
-                    <div className="header-wrapper">
-                        <div className="header-top-row">
-                            <a className="navbar-brand" href="#">
-                                <img src={gatorGabberLogo} alt="GatorGabber Logo" width="40" height="40" />
-                                GatorGabber
-                            </a>
-                            <button 
-                                className="settings-icon-btn"
-                                onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                                title="Settings"
-                                aria-label="Open settings"
-                            >
-                                <FaCog size={20} />
-                            </button>
+                {/* This is the main app "card" */}
+                <div className="app-container shadow-lg d-flex flex-column">
+                    
+                    {/* Header Navbar */}
+                    <header className="app-header navbar navbar-expand navbar-dark">
+                        <div className="header-wrapper">
+                            <div className="header-top-row">
+                                <a className="navbar-brand" href="#">
+                                    <img src={gatorGabberLogo} alt="GatorGabber Logo" width="40" height="40" />
+                                    GatorGabber
+                                </a>
+                                <button 
+                                    className="settings-icon-btn"
+                                    onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                                    title="Settings"
+                                    aria-label="Open settings"
+                                >
+                                    <FaCog size={20} />
+                                </button>
+                            </div>
+                            <div className="context-selector" role="group" aria-label="Class Context">
+                                <span className="navbar-text d-none d-sm-inline">Clase:</span>
+                                <button type="button" className={`btn btn-sm ${currentClass === 'default' ? 'btn-light' : 'btn-outline-light'}`} onClick={() => setCurrentClass('default')}>General</button>
+                                <button type="button" className={`btn btn-sm ${currentClass === 'spanish_1130' ? 'btn-light' : 'btn-outline-light'}`} onClick={() => setCurrentClass('spanish_1130')}>SPN1130</button>
+                                <button type="button" className={`btn btn-sm ${currentClass === 'spanish_1131' ? 'btn-light' : 'btn-outline-light'}`} onClick={() => setCurrentClass('spanish_1131')}>SPN1131</button>
+                                <button type="button" className={`btn btn-sm ${currentClass === 'spanish_2200' ? 'btn-light' : 'btn-outline-light'}`} onClick={() => setCurrentClass('spanish_2200')}>SPN2200</button>
+                                <button type="button" className={`btn btn-sm ${currentClass === 'spanish_2201' ? 'btn-light' : 'btn-outline-light'}`} onClick={() => setCurrentClass('spanish_2201')}>SPN2201</button>
+                            </div>
                         </div>
-                        <div className="context-selector" role="group" aria-label="Class Context">
-                            <span className="navbar-text d-none d-sm-inline">Clase:</span>
-                            <button type="button" className={`btn btn-sm ${currentClass === 'default' ? 'btn-light' : 'btn-outline-light'}`} onClick={() => setCurrentClass('default')}>General</button>
-                            <button type="button" className={`btn btn-sm ${currentClass === 'spanish_1130' ? 'btn-light' : 'btn-outline-light'}`} onClick={() => setCurrentClass('spanish_1130')}>SPN1130</button>
-                            <button type="button" className={`btn btn-sm ${currentClass === 'spanish_1131' ? 'btn-light' : 'btn-outline-light'}`} onClick={() => setCurrentClass('spanish_1131')}>SPN1131</button>
-                            <button type="button" className={`btn btn-sm ${currentClass === 'spanish_2200' ? 'btn-light' : 'btn-outline-light'}`} onClick={() => setCurrentClass('spanish_2200')}>SPN2200</button>
-                            <button type="button" className={`btn btn-sm ${currentClass === 'spanish_2201' ? 'btn-light' : 'btn-outline-light'}`} onClick={() => setCurrentClass('spanish_2201')}>SPN2201</button>
-                        </div>
+                    </header>
+
+                    {/* Chat Window */}
+                    <div className="chat-window flex-grow-1 p-3 p-md-4" ref={chatWindowRef}>
+                        {messages.map((m) => (
+                            <div key={m.id}>
+                                <MessageBubble
+                                    id={m.id}
+                                    role={m.role}
+                                    text={m.text}
+                                    onRepeat={handleRepeat}
+                                    onSlow={handleSlow}
+                                    onTranslate={handleTranslate}
+                                    onSyllable={handleSyllable}
+                                />
+                                {m.translation && (<div className="translation-bubble">{m.translation}</div>)}
+                                {m.syllables && (<div className="syllable-bubble">{m.syllables}</div>)}
+                            </div>
+                        ))}
+                        {isLoading && (<div className="typing-indicator"><span></span><span></span><span></span></div>)}
                     </div>
-                </header>
 
-                {/* Chat Window */}
-                <div className="chat-window flex-grow-1 p-3 p-md-4" ref={chatWindowRef}>
-                    {messages.map((m) => (
-                        <div key={m.id}>
-                            <MessageBubble
-                                id={m.id}
-                                role={m.role}
-                                text={m.text}
-                                onRepeat={handleRepeat}
-                                onSlow={handleSlow}
-                                onTranslate={handleTranslate}
-                                onSyllable={handleSyllable}
+                    {/* Footer and Form */}
+                    <footer className="message-form-container p-3 bg-white border-top">
+                        <form className="message-form d-flex align-items-center" onSubmit={handleSend}>
+                            
+                            {/* Input field */}
+                            <input
+                                type="text"
+                                className="form-control" 
+                                value={input}
+                                ref={inputRef}
+                                onChange={(e) => setInput(e.target.value)}
+                                placeholder={attachedFile ? `Archivo adjunto: ${attachedFile.name}` : "Escribe en español..."}
+                                disabled={isLoading}
                             />
-                            {m.translation && (<div className="translation-bubble">{m.translation}</div>)}
-                            {m.syllables && (<div className="syllable-bubble">{m.syllables}</div>)}
-                        </div>
-                    ))}
-                    {isLoading && (<div className="typing-indicator"><span></span><span></span><span></span></div>)}
-                </div>
-
-                {/* Footer and Form */}
-                <footer className="message-form-container p-3 bg-white border-top">
-                    <form className="message-form d-flex align-items-center" onSubmit={handleSend}>
-                        
-                        {/* Input field */}
-                        <input
-                            type="text"
-                            className="form-control" 
-                            value={input}
-                            ref={inputRef}
-                            onChange={(e) => setInput(e.target.value)}
-                            placeholder={attachedFile ? `Archivo adjunto: ${attachedFile.name}` : "Escribe en español..."}
-                            disabled={isLoading}
-                        />
-                        
-                        {/* Plus button (triggers file selection) */}
-                        <button 
-                            type="button" 
-                            onClick={handlePlusClick}
-                            className="btn btn-plus-circle ms-2" 
-                            title="Adjuntar Archivo" 
-                            disabled={isLoading}
-                        >
-                            <FaPlus size={16} />
-                        </button>
-
-                        {/* Hidden native file input */}
-                        <input
-                            type="file"
-                            ref={fileInputRef} 
-                            onChange={handleFileChange} 
-                            style={{ display: 'none' }} 
-                        />
-
-                        {/* Microphone button */}
-                        {sttSupported && (
+                            
+                            {/* Plus button (triggers file selection) */}
                             <button 
                                 type="button" 
-                                className={`btn btn-mic-circle ms-2 ${isListening ? 'listening' : ''}`}
-                                onClick={handleMicrophoneClick}
+                                onClick={handlePlusClick}
+                                className="btn btn-plus-circle ms-2" 
+                                title="Adjuntar Archivo" 
                                 disabled={isLoading}
-                                title="Hablar"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-mic-fill" viewBox="0 0 16 16">
-                                    <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/>
-                                    <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                                <FaPlus size={16} />
+                            </button>
+
+                            {/* Hidden native file input */}
+                            <input
+                                type="file"
+                                ref={fileInputRef} 
+                                onChange={handleFileChange} 
+                                style={{ display: 'none' }} 
+                            />
+
+                            {/* Microphone button */}
+                            {sttSupported && (
+                                <button 
+                                    type="button" 
+                                    className={`btn btn-mic-circle ms-2 ${isListening ? 'listening' : ''}`}
+                                    onClick={handleMicrophoneClick}
+                                    disabled={isLoading}
+                                    title="Hablar"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-mic-fill" viewBox="0 0 16 16">
+                                        <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/>
+                                        <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                                    </svg>
+                                </button>
+                            )}
+                        
+                            {/* Send button */}
+                            <button type="submit" className="btn btn-send-circle ms-2" disabled={isLoading || (!input.trim() && !attachedFile)}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-send-fill" viewBox="0 0 16 16">
+                                    <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.001.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
+                                    {/* Next, I'll complete the file by adding the closing tags for the form, footer, and divs. */}
                                 </svg>
                             </button>
-                        )}
-                    
-                        {/* Send button */}
-                        <button type="submit" className="btn btn-send-circle ms-2" disabled={isLoading || (!input.trim() && !attachedFile)}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-send-fill" viewBox="0 0 16 16">
-                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.001.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
-                                {/* Next, I'll complete the file by adding the closing tags for the form, footer, and divs. */}
-                            </svg>
-                        </button>
-                    </form>
-                </footer>
-            </div>
+                        </form>
+                    </footer>
+                </div>
 
-        </div>
+            </div>
+    </div>
     );
 }

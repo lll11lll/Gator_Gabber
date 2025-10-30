@@ -24,6 +24,29 @@ body {
   padding: 0;
 }
 
+/* Background animation wrapper - keep layout unchanged while placing canvas behind the app */
+.background-animation {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Ensure the canvas covers the wrapper and is behind the UI */
+.background-animation canvas {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Keep the page wrapper and app on top of the canvas */
+.page-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
 /* Page wrapper to center the app card */
 .page-wrapper {
   display: flex;
