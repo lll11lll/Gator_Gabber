@@ -17,36 +17,9 @@ interface LetterSymbol {
 }
 
 const Letters = [
-  "A",
-  "B",
-  "C",
-  "CH",
-  "D",
-  "E",
-  "F",
-  "G",
-  "H",
-  "I",
-  "J",
-  "K",
-  "L",
-  "LL",
-  "M",
-  "N",
-  "Ñ",
-  "O",
-  "P",
-  "Q",
-  "R",
-  "S",
-  "T",
-  "U",
-  "V",
-  "W",
-  "X",
-  "Y",
-  "Z"
-]
+    'A','B','C','CH','D','E','F','G','H','I','J','K','L','LL','M','N','Ñ','O','P','Q','R','S','T','U','V','W','X','Y','Z', 'Á','É','Í','Ó','Ú','Ü',
+    'a','b','c','ch','d','e','f','g','h','i','j','k','l','ll','m','n','ñ','o','p','q','r','s','t','u','v','w','x','y','z', 'á','é','í','ó','ú','ü'
+  ];
 
 export default function LettersAnimation() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
