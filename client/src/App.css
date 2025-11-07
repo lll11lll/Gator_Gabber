@@ -415,6 +415,73 @@ body {
   border-top: 1px solid #e2e8f0;
 }
 
+/* File attachment preview badge */
+.file-attachment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #e6f2ff 0%, #cce5ff 100%);
+  border: 1.5px solid #99ccff;
+  border-radius: 20px;
+  padding: 6px 12px;
+  margin: 8px 0 8px 20px;
+  font-size: 0.875rem;
+  color: var(--gator-blue);
+  font-weight: 500;
+  max-width: 300px;
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.file-attachment-badge svg {
+  flex-shrink: 0;
+}
+
+.file-attachment-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-remove-btn {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: var(--transition-smooth);
+  flex-shrink: 0;
+}
+
+.file-remove-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+/* Image preview in file badge */
+.file-image-preview {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1.5px solid #99ccff;
+}
+
 /* Styles for the refined input */
 .message-form {
   display: flex;
@@ -506,8 +573,8 @@ body {
 /* Add this to your App.css file */
 
 .btn-plus-circle {
-    /* Use a standard grey color for the circle */
-    background-color: #adb5bd; /* Bootstrap's gray-500 or similar */
+    /* UF Gator Blue with gradient */
+    background: linear-gradient(135deg, #0021A5 0%, #0039E6 100%);
     color: white; 
     border-radius: 50%;
     width: 44px;
@@ -516,21 +583,58 @@ body {
     justify-content: center;
     align-items: center;
     padding: 0;
-    flex-shrink: 0; /* Prevents the button from shrinking */
+    flex-shrink: 0;
     border: none;
-    box-shadow: none;
-    transition: background-color 0.15s ease-in-out;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
 }
 
-.btn-plus-circle:hover,
-.btn-plus-circle:focus {
-    background-color: #6c757d; /* Darker grey on hover */
-    color: white;
+/* Ripple effect on click */
+.btn-plus-circle::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+}
+
+.btn-plus-circle:active::before {
+    width: 100%;
+    height: 100%;
+}
+
+.btn-plus-circle:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0039E6 0%, #0021A5 100%);
+    transform: scale(1.08) rotate(90deg);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-plus-circle:active:not(:disabled) {
+    transform: scale(0.98) rotate(90deg);
 }
 
 .btn-plus-circle:disabled {
-    background-color: #e9ecef; /* Lighter grey when disabled */
-    opacity: 0.65;
+    background: #e9ecef;
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Icon styling inside button */
+.btn-plus-circle svg {
+    transition: transform 0.3s ease;
+}
+
+.btn-plus-circle:hover:not(:disabled) svg {
+    transform: rotate(90deg);
 }
 
 .btn-mic-circle:hover:not(:disabled) {

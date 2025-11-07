@@ -18,11 +18,9 @@ app = FastAPI()
 # Configure CORS for production deployment
 # Add your Vercel/Netlify frontend URL to allowed origins
 origins = [
-    
-    # "http://localhost:5050",
-    # "http://localhost:3000",
-    #"https://gatorgabber-bqxjc6ypa-nrgs-projects-2301850a.vercel.app"
-    # Add your production frontend URLs here after deployment:
+    "http://localhost:5173",  # Local development
+    "http://localhost:3000",
+    "https://gatorgabber.vercel.app",  # Production
     "https://gator-gabber.vercel.app",
 ]
 
@@ -63,35 +61,75 @@ class TranslateResponse(BaseModel):
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
+    """
+    Process chat messages with optional file attachments.
+    
+    Supports:
+        - Text-only conversations
+        - Image analysis (JPG, PNG, GIF, WebP)
+        - Text file processing (TXT, MD, etc.)
+        
+    The API automatically detects file types and routes to appropriate handler.
+    """
     text = (req.text or "").strip()
     if not text and not req.file:
         raise HTTPException(status_code=400, detail="Missing both message and file")
 
     try:
-        # Handle file content if present
-        file_context = None
-        if req.file and req.fileMetadata:
+        # Determine if file is an image
+        is_image = False
+        if req.fileMetadata and req.fileMetadata.type:
+            is_image = req.fileMetadata.type.startswith('image/')
+        
+        # Process based on file type
+        if req.file and is_image:
+            # IMAGE PROCESSING: Use vision API
+            print(f"Processing image: {req.fileMetadata.name}")
+            
+            # Reconstruct data URL for vision API
+            image_data_url = f"data:{req.fileMetadata.type};base64,{req.file}"
+            
+            # Get class context
+            context = req.classContext or "default"
+            
+            # Call LLM with image
+            reply = await generate_spanish_reply(text, context, image_data_url)
+            
+        elif req.file and not is_image:
+            # TEXT FILE PROCESSING: Extract and add to context
+            print(f"Processing text file: {req.fileMetadata.name}")
+            
             try:
-                # Decode base64 content
+                # Decode base64 to text
                 file_content = base64.b64decode(req.file).decode('utf-8')
                 
-                # Create context from file content
-                file_context = f"Content from file '{req.fileMetadata.name}':\n{file_content}"
-            except Exception as e:
-                print(f"File processing error: {e}")
-                file_context = "Error processing file content."
-
-        # Combine message context with file context if present
-        context = req.classContext or "default"
-        if file_context:
-            context = f"{context}\n\nFile Context:\n{file_context}"
-
-        # Pass both the message and context to the LLM service
-        reply = await generate_spanish_reply(text, context)
+                # Add file content to message
+                enhanced_message = f"{text}\n\n[Content from {req.fileMetadata.name}]:\n{file_content}"
+                
+                # Get class context
+                context = req.classContext or "default"
+                
+                # Call LLM with enhanced message
+                reply = await generate_spanish_reply(enhanced_message, context)
+                
+            except UnicodeDecodeError:
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Unable to read file as text. Please upload text or image files only."
+                )
+        else:
+            # TEXT-ONLY: Standard conversation
+            context = req.classContext or "default"
+            reply = await generate_spanish_reply(text, context)
+        
         return ChatResponse(response=reply)
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
     except Exception as e:
         print(f"LLM Error: {e}")
-        raise HTTPException(status_code=500, detail=f"LLM failure: {e}")
+        raise HTTPException(status_code=500, detail=f"LLM failure: {str(e)}")
 
 # New endpoint to handle translation requests
 @app.post("/api/translate", response_model=TranslateResponse)

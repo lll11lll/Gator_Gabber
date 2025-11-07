@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { FaCog, FaPlus } from 'react-icons/fa' 
+import { FaCog, FaPlus, FaTimes, FaImage, FaFile } from 'react-icons/fa' 
 import MessageBubble from './components/MessageBubble'
 import SettingsPanel from './components/SettingsPanel'
 import { sendMessage } from './services/api'
@@ -163,9 +163,21 @@ export default function App() {
         const selectedFile = event.target.files ? event.target.files[0] : null;
 
         if (selectedFile) {
-            // Optional: Validation check file size (e.g., limit to 10MB)
+            // Validation: Check file size (limit to 10MB)
             if (selectedFile.size > 10 * 1024 * 1024) { 
                 alert('El archivo es demasiado grande (máximo 10MB).');
+                event.target.value = null;
+                return;
+            }
+
+            // Validation: Check file type (images or text files)
+            const isImage = selectedFile.type.startsWith('image/');
+            const isText = selectedFile.type.startsWith('text/') || 
+                          selectedFile.name.endsWith('.txt') ||
+                          selectedFile.name.endsWith('.md');
+            
+            if (!isImage && !isText) {
+                alert('Solo se permiten archivos de imagen (JPG, PNG, GIF) o texto (TXT, MD).');
                 event.target.value = null;
                 return;
             }
@@ -176,13 +188,12 @@ export default function App() {
                 // Save the content (Base64 string) and the file object
                 setFileContent(e.target.result); 
                 setAttachedFile(selectedFile); 
-                console.log("File attached:", selectedFile.name);
-                setInput(`[Archivo adjunto: ${selectedFile.name}]`);
+                console.log("File attached:", selectedFile.name, selectedFile.type);
             };
 
             reader.onerror = () => {
-                 console.error("FileReader failed to read the file.");
-                 alert('Error al leer el archivo. Intenta de nuevo.');
+                console.error("FileReader failed to read the file.");
+                alert('Error al leer el archivo. Intenta de nuevo.');
             };
             
             // Read the file as a Data URL (Base64 string)
@@ -191,6 +202,18 @@ export default function App() {
         
         // Clear the file input's value for re-selection
         event.target.value = null; 
+    };
+
+    // Handler to remove attached file
+    const handleRemoveFile = () => {
+        setAttachedFile(null);
+        setFileContent(null);
+        console.log("File removed");
+    };
+
+    // Helper to check if file is an image
+    const isImageFile = (file) => {
+        return file && file.type.startsWith('image/');
     };
         
     // This is the completed function with file upload fix
@@ -344,6 +367,37 @@ export default function App() {
 
                     {/* Footer and Form */}
                     <footer className="message-form-container p-3 bg-white border-top">
+                        {/* File attachment preview */}
+                        {attachedFile && (
+                            <div className="file-attachment-badge">
+                                {isImageFile(attachedFile) ? (
+                                    <>
+                                        {fileContent && (
+                                            <img 
+                                                src={fileContent} 
+                                                alt="Preview" 
+                                                className="file-image-preview"
+                                            />
+                                        )}
+                                        <FaImage />
+                                    </>
+                                ) : (
+                                    <FaFile />
+                                )}
+                                <span className="file-attachment-name">
+                                    {attachedFile.name}
+                                </span>
+                                <button 
+                                    onClick={handleRemoveFile}
+                                    className="file-remove-btn"
+                                    type="button"
+                                    title="Eliminar archivo"
+                                >
+                                    <FaTimes />
+                                </button>
+                            </div>
+                        )}
+                        
                         <form className="message-form d-flex align-items-center" onSubmit={handleSend}>
                             
                             {/* Input field */}
@@ -353,7 +407,10 @@ export default function App() {
                                 value={input}
                                 ref={inputRef}
                                 onChange={(e) => setInput(e.target.value)}
-                                placeholder={attachedFile ? `Archivo adjunto: ${attachedFile.name}` : "Escribe en español..."}
+                                placeholder={attachedFile 
+                                    ? "Describe la imagen o haz una pregunta..." 
+                                    : "Escribe en español..."
+                                }
                                 disabled={isLoading}
                             />
                             

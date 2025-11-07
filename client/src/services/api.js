@@ -1,17 +1,41 @@
 // Get API URL from environment variable or default to relative path
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
-// ADDED - Feature 2: Update 'sendMessage' to accept a 'context' parameter
-export async function sendMessage(message, context = 'default') {
+/**
+ * Send a message to the chat API with optional file attachment
+ * 
+ * @param {Object|string} payload - Either an object with {text, classContext, file, fileMetadata} or a string message
+ * @returns {Promise<string>} - AI response
+ */
+export async function sendMessage(payload) {
+  // Support both new object format and legacy string format
+  let requestBody;
+  
+  if (typeof payload === 'string') {
+    // Legacy format: just a message string
+    requestBody = { 
+      text: payload, 
+      classContext: 'default' 
+    };
+  } else {
+    // New format: full payload object with file support
+    requestBody = {
+      text: payload.text || '',
+      classContext: payload.classContext || 'default',
+      file: payload.file || null,
+      fileMetadata: payload.fileMetadata || null
+    };
+  }
+
   const res = await fetch(`${API_BASE_URL}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    // ADDED - Feature 2: Send the 'context' in the request body
-    body: JSON.stringify({ message, context })
+    body: JSON.stringify(requestBody)
   });
 
   if (!res.ok) {
-    throw new Error(`API error ${res.status}: ${await res.text()}`);
+    const errorText = await res.text();
+    throw new Error(`API error ${res.status}: ${errorText}`);
   }
 
   const data = await res.json();
