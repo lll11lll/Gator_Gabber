@@ -1,91 +1,84 @@
-let cachedVoices = [];
+// OpenAI TTS Implementation
+// Get API URL from environment variable or default to relative path
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
-function loadVoices() {
-    cachedVoices = window.speechSynthesis.getVoices();
-    return cachedVoices;
-}
+// Keep track of current audio for stopping/canceling
+let currentAudio = null;
 
-export function getSpanishVoices() {
-    // Simple: return Spanish-capable voices for speech synthesis.
-    // - Calls `loadVoices()` which uses `speechSynthesis.getVoices()`.
-    // - If voices are not yet loaded (empty array), wait for the
-    //   'voiceschanged' event and then pick Spanish voices.
-    // - If voices are already available, return the filtered result right away.
-    // Returns either:
-    // - an array of voices (if available immediately), or
-    // - a Promise that resolves to that array (if we had to wait for 'voiceschanged').
-    // This keeps things simple for beginners: you can handle both sync and async
-    // return values by using `const v = await getSpanishVoices()` or
-    // `getSpanishVoices().then(...)`.
-    let voices = loadVoices();
-    if (!voices || voices.length === 0){
-        return new Promise((resolve) => {
-            const onChange = () => {
-                voices = loadVoices();
-                window.speechSynthesis.removeEventListener('voiceschanged', onChange);
-                resolve(selectSpanish(voices))
-        };
-        window.speechSynthesis.addEventListener('voiceschanged', onChange);
+/**
+ * Speak Spanish text using OpenAI TTS API
+ * @param {string} text - The Spanish text to speak
+ * @param {Object} options - Options for speech
+ * @param {number} options.rate - Speech rate (0.25 to 4.0, default 1.0)
+ * @returns {Promise<void>}
+ */
+export async function speakSpanish(text, { rate = 1 } = {}) {
+    try {
+        // Stop any currently playing audio
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+
+        // Clamp rate to OpenAI's supported range (0.25 to 4.0)
+        const speed = Math.max(0.25, Math.min(4.0, rate));
+
+        // Call backend TTS endpoint
+        const response = await fetch(`${API_BASE_URL}/api/tts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: text,
+                speed: speed
+            })
         });
+
+        if (!response.ok) {
+            throw new Error(`TTS API error: ${response.status}`);
+        }
+
+        // Get audio blob from response
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        // Create and play audio
+        currentAudio = new Audio(audioUrl);
+        
+        // Clean up blob URL when audio finishes
+        currentAudio.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+            currentAudio = null;
+        };
+
+        // Handle errors
+        currentAudio.onerror = (e) => {
+            console.error('Audio playback error:', e);
+            URL.revokeObjectURL(audioUrl);
+            currentAudio = null;
+        };
+
+        // Play the audio
+        await currentAudio.play();
+
+    } catch (error) {
+        console.error('TTS Error:', error);
+        throw error;
     }
-    return selectSpanish(voices);
 }
 
-function selectSpanish(voices) {
-    // prefer es-ES / es-MX / es-US
-    if (!Array.isArray(voices) || voices.length === 0){
-        return null;
+/**
+ * Stop any currently playing speech
+ */
+export function stopSpeaking() {
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
     }
-    // Step 1: try to find a voice with lang like "es-ES", "es-MX", "es-US", etc.
-    // Explanation: ^(es-|es_) means the string starts (^) with "es-" or "es_".
-    // Some platforms use underscore instead of hyphen.
-    let preferred = null;
-    for (const v of voices) {
-        const lang = (v.lang || "").toLowerCase();
-        const matchesSpanishD_Or_U = lang.startsWith("es-") || lang.startsWith("es_");
-        if (matchesSpanishD_Or_U) {
-            preferred = v;
-            break;
-        }
-    }
-    if (preferred){
-        return preferred;
-    }
-     // Step 2: fallback — any language that starts with "es" (e.g., just "es")
-     let genericSpanish = null;
-     for (const v of voices){
-        const lang = (v.lang || "").toLowerCase();
-        if (lang.startsWith("es")){
-            genericSpanish = v;
-            break;
-        }
-     }
-
-     if (genericSpanish){
-        return genericSpanish;
-     }
-
-     // Step 3: absolute fallback — return the first available voice
-     return voices[0] || null;
 }
 
-export async function speakSpanish(text, {rate=1, pitch=1, voice=null} = {} ){
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel(); // stop anything
-
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = rate;
-    utter.pitch = pitch;
-
-    // Use provided voice or fallback to Spanish voice
-    let selectedVoice;
-    if (voice) {
-        selectedVoice = voice;
-    } else {
-        selectedVoice = await getSpanishVoices();
-    }
-    
-    if(selectedVoice) utter.voice = selectedVoice;
-    utter.lang = selectedVoice?.lang || 'es-ES';
-    window.speechSynthesis.speak(utter);
+// Legacy compatibility - these functions are no longer needed with OpenAI TTS
+// but kept for backwards compatibility
+export function getSpanishVoices() {
+    // OpenAI TTS uses 'alloy' voice - no voice selection needed
+    return Promise.resolve([{ name: 'OpenAI Alloy', lang: 'es-ES' }]);
 }

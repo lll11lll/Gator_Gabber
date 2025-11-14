@@ -3,41 +3,8 @@ import { FaCog } from 'react-icons/fa'
 import './SettingsPanel.css';
 
 export default function SettingsPanel({ isOpen, onClose, settings, onSettingsChange, customPrompts, onCustomPromptsChange }) {
-  const [availableVoices, setAvailableVoices] = useState([]);
-  const [spanishVoices, setSpanishVoices] = useState([]);
-
-  useEffect(() => {
-    // Load available voices
-    const loadVoices = () => {
-      const voices = window.speechSynthesis.getVoices();
-      setAvailableVoices(voices);
-      
-      // Filter Spanish voices
-      const spanish = voices.filter(voice => 
-        voice.lang.toLowerCase().startsWith('es')
-      );
-      setSpanishVoices(spanish);
-    };
-
-    loadVoices();
-    
-    // Some browsers load voices asynchronously
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
-  }, []);
-
   const handleRateChange = (e) => {
     onSettingsChange({ ...settings, rate: parseFloat(e.target.value) });
-  };
-
-  const handlePitchChange = (e) => {
-    onSettingsChange({ ...settings, pitch: parseFloat(e.target.value) });
-  };
-
-  const handleVoiceChange = (e) => {
-    const selectedVoice = availableVoices.find(v => v.name === e.target.value);
-    onSettingsChange({ ...settings, voice: selectedVoice });
   };
 
   const handleSystemPromptChange = (e) => {
@@ -132,48 +99,20 @@ export default function SettingsPanel({ isOpen, onClose, settings, onSettingsCha
 
           {/* Voice Settings Section */}
           <div className="settings-section">
-            <h4 className="section-title">Voice Settings</h4>
+            <h4 className="section-title">Voice Settings (OpenAI TTS)</h4>
 
-          {/* Voice Selection */}
+          {/* Voice Info */}
           <div className="setting-group">
-            <label htmlFor="voice-select">
+            <label>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
                 <path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z"/>
               </svg>
-              Voice
+              Voice: <span className="setting-value">Alloy (OpenAI)</span>
             </label>
-            <select 
-              id="voice-select"
-              value={settings.voice?.name || ''} 
-              onChange={handleVoiceChange}
-              className="settings-select"
-            >
-              {spanishVoices.length > 0 ? (
-                <>
-                  <optgroup label="Spanish Voices">
-                    {spanishVoices.map((voice) => (
-                      <option key={voice.name} value={voice.name}>
-                        {voice.name} ({voice.lang})
-                      </option>
-                    ))}
-                  </optgroup>
-                  {availableVoices.filter(v => !v.lang.toLowerCase().startsWith('es')).length > 0 && (
-                    <optgroup label="Other Voices">
-                      {availableVoices
-                        .filter(v => !v.lang.toLowerCase().startsWith('es'))
-                        .map((voice) => (
-                          <option key={voice.name} value={voice.name}>
-                            {voice.name} ({voice.lang})
-                          </option>
-                        ))}
-                    </optgroup>
-                  )}
-                </>
-              ) : (
-                <option value="">Loading voices...</option>
-              )}
-            </select>
+            <small className="setting-hint">
+              Using OpenAI's Alloy voice for high-quality, natural Spanish pronunciation
+            </small>
           </div>
 
           {/* Rate Control */}
@@ -188,56 +127,25 @@ export default function SettingsPanel({ isOpen, onClose, settings, onSettingsCha
             <input
               id="rate-slider"
               type="range"
-              min="0.1"
-              max="2.0"
-              step="0.1"
+              min="0.25"
+              max="4.0"
+              step="0.05"
               value={settings.rate}
               onChange={handleRateChange}
               className="settings-slider"
             />
             <div className="slider-labels">
-              <span>0.1x (Slow)</span>
-              <span>2.0x (Fast)</span>
-            </div>
-          </div>
-
-          {/* Pitch Control */}
-          <div className="setting-group">
-            <label htmlFor="pitch-slider">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8 3a5 5 0 0 0-5 5v1h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a6 6 0 1 1 12 0v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1V8a5 5 0 0 0-5-5z"/>
-              </svg>
-              Pitch: <span className="setting-value">{settings.pitch.toFixed(1)}</span>
-            </label>
-            <input
-              id="pitch-slider"
-              type="range"
-              min="0.1"
-              max="2.0"
-              step="0.1"
-              value={settings.pitch}
-              onChange={handlePitchChange}
-              className="settings-slider"
-            />
-            <div className="slider-labels">
-              <span>0.1 (Low)</span>
-              <span>2.0 (High)</span>
+              <span>0.25x (Very Slow)</span>
+              <span>4.0x (Very Fast)</span>
             </div>
           </div>
 
           {/* Test Button */}
           <button 
             className="test-voice-btn"
-            onClick={() => {
-              const utterance = new SpeechSynthesisUtterance('¡Hola! Esta es una prueba de voz.');
-              utterance.rate = settings.rate;
-              utterance.pitch = settings.pitch;
-              if (settings.voice) {
-                utterance.voice = settings.voice;
-              }
-              utterance.lang = settings.voice?.lang || 'es-ES';
-              window.speechSynthesis.cancel();
-              window.speechSynthesis.speak(utterance);
+            onClick={async () => {
+              const { speakSpanish } = await import('../tts');
+              speakSpanish('¡Hola! Esta es una prueba de la voz de OpenAI.', { rate: settings.rate });
             }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">

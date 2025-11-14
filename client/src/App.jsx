@@ -52,11 +52,9 @@ export default function App() {
     const [sttSupported, setSttSupported] = useState(true);
     // Settings panel state
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    // Voice settings state
+    // Voice settings state - only rate needed for OpenAI TTS
     const [voiceSettings, setVoiceSettings] = useState({
-        rate: 1.0,
-        pitch: 1.0,
-        voice: null
+        rate: 1.0
     });
 
     const inputRef = useRef(null);
