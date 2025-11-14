@@ -39,10 +39,15 @@ Adjust your complexity based on the user's responses. Start at a moderate level 
 }
 
 # ADDED - Feature 2: Main function to dynamically build the system prompt
-def get_system_prompt(context: str | None = None) -> str:
+def get_system_prompt(context: str | None = None, custom_prompt: str | None = None) -> str:
     """
-    Generates the system prompt based on the selected class context.
+    Generates the system prompt based on the selected class context or custom prompt.
+    If custom_prompt is provided, it overrides the default context prompt.
     """
+    # If custom prompt is provided, use it instead of class-specific prompts
+    if custom_prompt:
+        return BASE_PROMPT + "\n\n" + custom_prompt
+    
     # ADDED - Feature 2: Logic to safely select the correct context or fall back to 'default'
     if not context or context not in CLASS_PROMPTS:
         context_key = "default"

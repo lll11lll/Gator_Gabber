@@ -13,7 +13,8 @@ load_dotenv()
 async def generate_spanish_reply(
     user_message: str, 
     context: str | None = None,
-    image_base64: str | None = None
+    image_base64: str | None = None,
+    custom_system_prompt: str | None = None
 ) -> str:
     """
     Generate a Spanish reply using the "Alberto" persona with optional image support.
@@ -22,6 +23,7 @@ async def generate_spanish_reply(
         user_message: User's text message
         context: Class context (e.g., "spanish_1130", "default")
         image_base64: Optional Base64-encoded image with data URL prefix
+        custom_system_prompt: Optional custom system prompt override
         
     Returns:
         AI-generated Spanish response
@@ -30,11 +32,13 @@ async def generate_spanish_reply(
         - RAG support for SPN1130 (text-only conversations)
         - Vision API for image analysis (when image provided)
         - Context-aware responses based on class level
+        - Custom system prompt support for teacher customization
         
     Note:
         RAG is disabled when processing images to focus on visual content.
     """
-    system_prompt = get_system_prompt(context)
+    # Get the system prompt for the given context (or use custom prompt)
+    system_prompt = get_system_prompt(context, custom_system_prompt)
     augmented_message = user_message
     
     # RAG Enhancement (only for text-only SPN1130 conversations)

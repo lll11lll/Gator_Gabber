@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { FaCog } from 'react-icons/fa'
 import './SettingsPanel.css';
 
-export default function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }) {
+export default function SettingsPanel({ isOpen, onClose, settings, onSettingsChange, customPrompts, onCustomPromptsChange }) {
   const [availableVoices, setAvailableVoices] = useState([]);
   const [spanishVoices, setSpanishVoices] = useState([]);
 
@@ -40,6 +40,18 @@ export default function SettingsPanel({ isOpen, onClose, settings, onSettingsCha
     onSettingsChange({ ...settings, voice: selectedVoice });
   };
 
+  const handleSystemPromptChange = (e) => {
+    onCustomPromptsChange({ ...customPrompts, systemPrompt: e.target.value });
+  };
+
+  const handleInitialMessageChange = (e) => {
+    onCustomPromptsChange({ ...customPrompts, initialMessage: e.target.value });
+  };
+
+  const handleResetPrompts = () => {
+    onCustomPromptsChange({ systemPrompt: '', initialMessage: '' });
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -52,7 +64,7 @@ export default function SettingsPanel({ isOpen, onClose, settings, onSettingsCha
         <div className="settings-header">
           <h3>
             <FaCog />
-            Voice Settings
+            Settings
           </h3>
           <button className="close-btn" onClick={onClose} aria-label="Close settings">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
@@ -62,6 +74,66 @@ export default function SettingsPanel({ isOpen, onClose, settings, onSettingsCha
         </div>
 
         <div className="settings-content">
+          {/* Teacher Customization Section */}
+          <div className="settings-section">
+            <h4 className="section-title">Teacher Customization</h4>
+            
+            <div className="setting-group">
+              <label htmlFor="system-prompt">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                  <path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6zm0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+                Custom System Prompt
+              </label>
+              <textarea
+                id="system-prompt"
+                className="settings-textarea"
+                rows="4"
+                placeholder="Enter custom instructions for the AI (e.g., 'Focus on vocabulary about food and restaurants'). Leave empty to use default class prompts."
+                value={customPrompts.systemPrompt}
+                onChange={handleSystemPromptChange}
+              />
+              <small className="setting-hint">
+                Customize the AI's behavior and topic focus for your lesson
+              </small>
+            </div>
+
+            <div className="setting-group">
+              <label htmlFor="initial-message">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
+                </svg>
+                Custom Initial Message
+              </label>
+              <textarea
+                id="initial-message"
+                className="settings-textarea"
+                rows="2"
+                placeholder="Enter a custom greeting in Spanish (e.g., '¡Hola estudiantes! Hoy vamos a practicar el pretérito.'). Leave empty for default."
+                value={customPrompts.initialMessage}
+                onChange={handleInitialMessageChange}
+              />
+              <small className="setting-hint">
+                Set a custom greeting that students will see when starting the chat
+              </small>
+            </div>
+
+            <div className="button-group">
+              <button 
+                className="reset-prompts-btn"
+                onClick={handleResetPrompts}
+                disabled={!customPrompts.systemPrompt && !customPrompts.initialMessage}
+              >
+                Reset to Defaults
+              </button>
+            </div>
+          </div>
+
+          {/* Voice Settings Section */}
+          <div className="settings-section">
+            <h4 className="section-title">Voice Settings</h4>
+
           {/* Voice Selection */}
           <div className="setting-group">
             <label htmlFor="voice-select">
@@ -173,6 +245,7 @@ export default function SettingsPanel({ isOpen, onClose, settings, onSettingsCha
             </svg>
             Test Voice
           </button>
+          </div>
         </div>
       </div>
     </>

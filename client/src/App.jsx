@@ -13,15 +13,26 @@ import './App.css'
 
 export default function App() {
     // State to hold messages
-    const [messages, setMessages] = useState([
-        {
+    const [messages, setMessages] = useState([]);
+    
+    // State for custom prompts
+    const [customPrompts, setCustomPrompts] = useState({
+        systemPrompt: '',
+        initialMessage: ''
+    });
+    
+    // Initialize messages based on custom initial message
+    useEffect(() => {
+        const initialText = customPrompts.initialMessage.trim() || '¡Hola! ¿Cómo estás hoy?';
+        setMessages([{
             id: 1, 
             role: 'assistant', 
-            text: '¡Hola! ¿Cómo estás hoy?', 
+            text: initialText, 
             translation: null,
             syllables: null
-        }
-    ]);
+        }]);
+    }, [customPrompts.initialMessage]);
+    
     // State to hold user input
     const [input, setInput] = useState('');
     // State to hold loading status
@@ -53,6 +64,23 @@ export default function App() {
     // Ref for the hidden file input
     const fileInputRef = useRef(null); 
     const lastSpokenIdRef = useRef(null);
+
+    // Load custom prompts from localStorage on mount
+    useEffect(() => {
+        const savedPrompts = localStorage.getItem('customPrompts');
+        if (savedPrompts) {
+            try {
+                setCustomPrompts(JSON.parse(savedPrompts));
+            } catch (err) {
+                console.error('Failed to load custom prompts:', err);
+            }
+        }
+    }, []);
+
+    // Save custom prompts to localStorage when changed
+    useEffect(() => {
+        localStorage.setItem('customPrompts', JSON.stringify(customPrompts));
+    }, [customPrompts]);
 
     // Check if STT is supported on component mount
     useEffect(() => {
@@ -270,7 +298,9 @@ export default function App() {
             text: trimmed, 
             classContext: currentClass, 
             file: contentToSend,      // Base64 content of the file (without data URL prefix)
-            fileMetadata: fileMetadata // e.g., { name: "test.pdf", type: "application/pdf" }
+            fileMetadata: fileMetadata, // e.g., { name: "test.pdf", type: "application/pdf" }
+            customSystemPrompt: customPrompts.systemPrompt.trim() || null,
+            customInitialMessage: customPrompts.initialMessage.trim() || null
         };
 
         try {
@@ -312,6 +342,8 @@ export default function App() {
                     onClose={() => setIsSettingsOpen(false)}
                     settings={voiceSettings}
                     onSettingsChange={setVoiceSettings}
+                    customPrompts={customPrompts}
+                    onCustomPromptsChange={setCustomPrompts}
                 />
                 
                 {/* This is the main app "card" */}

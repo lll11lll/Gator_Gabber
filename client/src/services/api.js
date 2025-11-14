@@ -2,9 +2,9 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 /**
- * Send a message to the chat API with optional file attachment
+ * Send a message to the chat API with optional file attachment and custom prompts
  * 
- * @param {Object|string} payload - Either an object with {text, classContext, file, fileMetadata} or a string message
+ * @param {Object|string} payload - Either an object with {text, classContext, file, fileMetadata, customSystemPrompt, customInitialMessage} or a string message
  * @returns {Promise<string>} - AI response
  */
 export async function sendMessage(payload) {
@@ -18,12 +18,14 @@ export async function sendMessage(payload) {
       classContext: 'default' 
     };
   } else {
-    // New format: full payload object with file support
+    // New format: full payload object with file support and custom prompts
     requestBody = {
       text: payload.text || '',
       classContext: payload.classContext || 'default',
       file: payload.file || null,
-      fileMetadata: payload.fileMetadata || null
+      fileMetadata: payload.fileMetadata || null,
+      customSystemPrompt: payload.customSystemPrompt || null,
+      customInitialMessage: payload.customInitialMessage || null
     };
   }
 

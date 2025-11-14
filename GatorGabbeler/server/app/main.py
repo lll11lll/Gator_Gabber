@@ -44,6 +44,8 @@ class ChatRequest(BaseModel):
     classContext: str | None = None
     file: Optional[str] = None  # base64 encoded file content
     fileMetadata: Optional[FileMetadata] = None
+    customSystemPrompt: Optional[str] = None  # Custom system prompt override
+    customInitialMessage: Optional[str] = None  # Custom initial bot message
 
 class ChatResponse(BaseModel):
     response: str
@@ -93,7 +95,7 @@ async def chat(req: ChatRequest):
             context = req.classContext or "default"
             
             # Call LLM with image
-            reply = await generate_spanish_reply(text, context, image_data_url)
+            reply = await generate_spanish_reply(text, context, image_data_url, req.customSystemPrompt)
             
         elif req.file and not is_image:
             # TEXT FILE PROCESSING: Extract and add to context
@@ -110,7 +112,7 @@ async def chat(req: ChatRequest):
                 context = req.classContext or "default"
                 
                 # Call LLM with enhanced message
-                reply = await generate_spanish_reply(enhanced_message, context)
+                reply = await generate_spanish_reply(enhanced_message, context, None, req.customSystemPrompt)
                 
             except UnicodeDecodeError:
                 raise HTTPException(
@@ -120,7 +122,7 @@ async def chat(req: ChatRequest):
         else:
             # TEXT-ONLY: Standard conversation
             context = req.classContext or "default"
-            reply = await generate_spanish_reply(text, context)
+            reply = await generate_spanish_reply(text, context, None, req.customSystemPrompt)
         
         return ChatResponse(response=reply)
         
