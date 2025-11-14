@@ -3,10 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 import os
 import base64
 from typing import Optional, Dict
+import openai
 
 # Import the 'generate_translation' function
 from .services.llm import generate_spanish_reply, generate_translation
@@ -58,6 +59,11 @@ class TranslateRequest(BaseModel):
 #Pydantic model for the new translation response
 class TranslateResponse(BaseModel):
     translation: str
+
+# Pydantic model for TTS request
+class TTSRequest(BaseModel):
+    text: str
+    speed: float = 1.0  # 0.25 to 4.0
 
 # --- API Endpoints ---
 
@@ -142,6 +148,53 @@ async def translate(req: TranslateRequest):
     except Exception as e:
         print(f"Translation Error: {e}")
         raise HTTPException(status_code=500, detail=f"Translation failure: {e}")
+
+# New endpoint for OpenAI TTS
+@app.post("/api/tts")
+async def text_to_speech(req: TTSRequest):
+    """
+    Convert Spanish text to speech using OpenAI TTS API.
+    
+    Args:
+        text: The Spanish text to convert to speech
+        speed: Playback speed (0.25 to 4.0, default 1.0)
+    
+    Returns:
+        Audio stream (MP3 format)
+    """
+    try:
+        # Validate speed
+        speed = max(0.25, min(4.0, req.speed))
+        
+        # Get OpenAI API key from environment
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise HTTPException(status_code=500, detail="OpenAI API key not configured")
+        
+        # Initialize OpenAI client
+        client = openai.OpenAI(api_key=api_key)
+        
+        # Generate speech using OpenAI TTS
+        response = client.audio.speech.create(
+            model="tts-1",  # Fast, cost-effective model
+            voice="alloy",  # Natural, neutral voice
+            input=req.text,
+            speed=speed
+        )
+        
+        # Return audio stream
+        return StreamingResponse(
+            response.iter_bytes(),
+            media_type="audio/mpeg",
+            headers={
+                "Content-Disposition": "inline",
+                "Cache-Control": "no-cache"
+            }
+        )
+        
+    except Exception as e:
+        print(f"TTS Error: {e}")
+        raise HTTPException(status_code=500, detail=f"TTS generation failed: {str(e)}")
 
 # RAG: Health check endpoint for RAG system
 @app.get("/api/rag/status")
