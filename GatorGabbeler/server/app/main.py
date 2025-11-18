@@ -20,9 +20,8 @@ app = FastAPI()
 # Add your Vercel/Netlify frontend URL to allowed origins
 origins = [
     "http://localhost:5173",  # Local development
-    "http://localhost:3000",
-    "https://gatorgabber.vercel.app",  # Production
-    "https://gator-gabber.vercel.app",
+    "http://localhost:3000",  # Alternative local port
+    "https://gatorgabber.vercel.app",  # Production frontend
 ]
 
 # Allow CORS for deployed frontend
